@@ -1,0 +1,14 @@
+node_modules/
+src/*.js
+src/*.js.map
+src/ckpts/
+src/images/
+build/
+bower_components/
+
+npm-debug.log
+.DS_Store
+dist/
+.idea/
+
+*~

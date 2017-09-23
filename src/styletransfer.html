@@ -1,0 +1,124 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+
+<dom-module id="styletransfer-demo">
+<style>
+  #pagewrap {
+    padding: 5px;
+    width: 960px;
+    margin: 20px auto;
+  }
+  header {
+    height: 100px;
+    padding: 0 15px;
+  }
+  #content {
+    width: 420px;
+    float: left;
+    padding: 5px 15px;
+  }
+
+  #style {
+    width: 424px; /* Account for margins + border values */
+    float: right;
+    padding: 5px 15px;
+    margin: 0px 5px 5px 5px;
+  }
+  
+  footer {
+    clear: both;
+    padding: 0 15px;
+  }
+
+  #activationsContainer, #webcam-message, #ssl-message {
+    text-align: center;
+  }
+  #webcam-message, #load-error-message, #ssl-message {
+    background-color: #fbb;
+    outline: 1px solid rgb(100, 0, 0);
+    width: 904px;
+    padding: 5px 0;
+    margin: 10px auto;
+  }
+  #imgContainer, #className {
+    display: table-cell;
+    vertical-align: top;
+  }
+  #className {
+    padding-top: 40px;
+  }
+  #inference-canvas {
+    width: 800px;
+  }
+</style>
+<template>
+
+  <div id="pagewrap">
+
+    <section id="content">
+      <div id="imgContainer" align="middle">
+        <img id="contentImg"/>
+        <paper-dropdown-menu no-animations label="Content">
+          <paper-listbox attr-for-selected="value" id="content-dropdown" class="dropdown-content" selected="{{selectedContentName}}" slot="dropdown-content">
+            <template is="dom-repeat" items="[[contentNames]]">
+              <paper-item value="[[item]]" label="[[item]]">
+                [[item]]
+              </paper-item>
+            </template>
+          </paper-listbox>
+        </paper-dropdown-menu>
+      </div>
+    </section>
+
+    <section id="style">
+      <div id="imgContainer" align="middle">
+        <img id="styleImg"/>
+        <paper-dropdown-menu no-animations label="Style">
+          <paper-listbox attr-for-selected="value" id="style-dropdown" class="dropdown-content" selected="{{selectedStyleName}}" slot="dropdown-content">
+            <template is="dom-repeat" items="[[styleNames]]">
+              <paper-item value="[[item]]" label="[[item]]">
+                [[item]]
+              </paper-item>
+            </template>
+          </paper-listbox>
+        </paper-dropdown-menu>
+      </div>
+    </section>
+
+    <footer>
+      <div class="train-button-container" align="middle">
+        <paper-button class="button" raised id="start">Start Style Transfer</paper-button>
+      </div>
+      <div id="canvasContainer" align="middle">
+        <canvas id="imageCanvas" width="300" height="300"></canvas>
+      </div>
+    </footer>
+    
+  </div>
+    
+  <input type="file" id="fileSelect" style="display: none" accept="image/x-png,image/gif,image/jpeg"/>
+  
+
+  <div>Status: [[status]]</div>
+
+  <paper-dialog id="webcam-dialog" modal>
+    <h2>Take a photo</h2>
+    <video id="webcamVideo" width="500" height="375"></video>
+    <div class="buttons">
+      <paper-button id='closeModal' dialog-dismiss>Cancel</paper-button>
+      <paper-button id='takePicButton' dialog-confirm autofocus>Take the pic!</paper-button>
+    </div>
+  </paper-dialog>
+
+  <canvas id="hiddenCanvas" style="display: none"></canvas>
+
+  <div id="load-error-message" style="display: none">
+    We could not find a webcam, attach one to view the full demo!
+  </div>
+
+</template>
+</dom-module>
