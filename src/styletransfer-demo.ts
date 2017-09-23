@@ -83,9 +83,9 @@ export class StyleTransferDemo extends StyleTransferDemoPolymer {
 
     // Render DOM for images
     this.contentNames = CONTENT_NAMES;
-    this.selectedContentName = 'face';
-    this.contentImgElement.src = 'images/face.jpg';
-    this.contentImgElement.height = 250;
+    this.selectedContentName = 'stata';
+    this.contentImgElement.src = 'images/stata.jpg';
+    this.contentImgElement.height = 150;
 
     this.styleNames = STYLE_NAMES;
     this.selectedStyleName = 'udnie';
