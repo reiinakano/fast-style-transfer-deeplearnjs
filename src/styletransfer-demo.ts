@@ -27,7 +27,7 @@ export enum ApplicationState {
 }
 
 const CONTENT_NAMES = ['stata', 'face', 'face2', 'face3', 'diana', 'Upload from file'];
-const STYLE_NAMES = ['udnie', 'scream', 'f'];
+const STYLE_NAMES = ['udnie', 'scream'];
 
 export class StyleTransferDemo extends StyleTransferDemoPolymer {
   // DeeplearnJS stuff
@@ -85,7 +85,7 @@ export class StyleTransferDemo extends StyleTransferDemoPolymer {
     this.contentNames = CONTENT_NAMES;
     this.selectedContentName = 'stata';
     this.contentImgElement.src = 'images/stata.jpg';
-    this.contentImgElement.height = 150;
+    this.contentImgElement.height = 250;
 
     this.styleNames = STYLE_NAMES;
     this.selectedStyleName = 'udnie';
@@ -234,8 +234,14 @@ export class StyleTransferDemo extends StyleTransferDemoPolymer {
   private setCanvasShape(shape: number[]) {
     this.canvas.width = shape[1];
     this.canvas.height = shape[0];
-    this.canvas.style.width = shape[1] + 'px';
-    this.canvas.style.height = shape[0] + 'px';
+    if (shape[1] > shape[0]) {
+      this.canvas.style.width = '500px';
+      this.canvas.style.height = shape[0]/shape[1]*500 + 'px';
+    }
+    else {
+      this.canvas.style.height = '500px';
+      this.canvas.style.width = shape[1]/shape[0]*500 + 'px';
+    }
   }
 
   private drawOnCanvas(ndarray: Array3D) {
