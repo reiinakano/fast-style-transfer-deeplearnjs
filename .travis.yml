@@ -6,6 +6,7 @@ install:
 script:
   - "./scripts/deploy-demo src/styletransfer-demo.ts src/styletransfer-demo.html build"
   - "mv build/styletransfer-demo.html build/index.html"
+  - "cp src/support.js build/support.js"
 deploy:
   provider: pages
   skip_cleanup: true
@@ -13,4 +14,3 @@ deploy:
   on:
     branch: master
   local_dir: "build"
-  
