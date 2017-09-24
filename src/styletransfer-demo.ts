@@ -27,7 +27,15 @@ export enum ApplicationState {
 }
 
 const CONTENT_NAMES = ['stata', 'face', 'diana', 'Upload from file'];
-const STYLE_NAMES = ['udnie', 'scream', 'la_muse', 'rain_princess', 'wave', 'wreck'];
+const STYLE_MAPPINGS: {[varName: string]: string} = {
+  'Udnie, Francis Picabia': 'udnie',
+  'The Scream, Edvard Munch': 'scream',
+  'La Muse, Pablo Picasso': 'la_muse',
+  'Rain Princess, Leonid Afremov': 'rain_princess',
+  'The Wave, Katsushika Hokusai': 'wave',
+  'The Wreck of the Minotaur, J.M.W. Turner': 'wreck'
+}
+const STYLE_NAMES = Object.keys(STYLE_MAPPINGS);
 
 export class StyleTransferDemo extends StyleTransferDemoPolymer {
   // DeeplearnJS stuff
@@ -88,7 +96,7 @@ export class StyleTransferDemo extends StyleTransferDemoPolymer {
     this.contentImgElement.height = 250;
 
     this.styleNames = STYLE_NAMES;
-    this.selectedStyleName = 'udnie';
+    this.selectedStyleName = 'Udnie, Francis Picabia';
     this.styleImgElement.src = 'images/udnie.jpg';
     this.styleImgElement.height = 250;
 
@@ -129,7 +137,8 @@ export class StyleTransferDemo extends StyleTransferDemoPolymer {
     const styleDropdown = this.querySelector('#style-dropdown');
     // tslint:disable-next-line:no-any
     styleDropdown.addEventListener('iron-activate', (event: any) => {
-      this.styleImgElement.src = 'images/' + event.detail.selected + '.jpg';
+
+      this.styleImgElement.src = 'images/' + STYLE_MAPPINGS[event.detail.selected] + '.jpg';
     });
 
     // Add listener to start
@@ -140,7 +149,7 @@ export class StyleTransferDemo extends StyleTransferDemoPolymer {
       this.startButton.textContent = 'Starting style transfer.. Downloading + running model';
       this.startButton.disabled = true;
       this.transformNet = new TransformNet(this.gpgpu, this.math,
-        this.selectedStyleName);
+        STYLE_MAPPINGS[this.selectedStyleName]);
       this.transformNet.loadVariables()
       .then(() => {
         this.startButton.textContent = 'Processing image';
