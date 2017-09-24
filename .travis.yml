@@ -13,6 +13,7 @@ script:
   - "mv build/styletransfer-demo.html build/index.html"
   - "cp src/support.js build/support.js"
   - "cp -r src/images build/images"
+  - "cp -r src/ckpts build/ckpts"
 deploy:
   provider: pages
   skip_cleanup: true

@@ -4,7 +4,7 @@ import * as imagenet_util from './imagenet_util';
 
 const GOOGLE_CLOUD_STORAGE_DIR =
 //    'https://storage.googleapis.com/learnjs-data/checkpoint_zoo/';
-    'http://127.0.0.1:8080/src/ckpts/';
+    document.URL.substr(0,document.URL.lastIndexOf('/')) + '/ckpts/';
 
 export class TransformNet {
   private variables: {[varName: string]: NDArray};
