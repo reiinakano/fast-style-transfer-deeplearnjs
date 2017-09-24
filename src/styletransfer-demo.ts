@@ -26,7 +26,7 @@ export enum ApplicationState {
   TRAINING = 2
 }
 
-const CONTENT_NAMES = ['stata', 'face', 'face2', 'face3', 'diana', 'Upload from file'];
+const CONTENT_NAMES = ['stata', 'face', 'diana', 'Upload from file'];
 const STYLE_NAMES = ['udnie', 'scream'];
 
 export class StyleTransferDemo extends StyleTransferDemoPolymer {

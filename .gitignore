@@ -2,7 +2,6 @@ node_modules/
 src/bundle.js
 src/*.js.map
 src/ckpts/
-src/images/
 build/
 bower_components/
 
