@@ -1,6 +1,11 @@
 language: node_js
 node_js:
   - "7"
+git:
+  lfs_skip_smudge: true
+before_install:
+  - echo -e "machine github.com\n  login $GITHUB_TOKEN" >> ~/.netrc
+  - git lfs pull
 install:
   - "npm install && bower install && mkdir build"
 script:
