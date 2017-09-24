@@ -13,3 +13,4 @@ deploy:
   on:
     branch: master
   local_dir: "build"
+  
