@@ -27,7 +27,7 @@ export enum ApplicationState {
 }
 
 const CONTENT_NAMES = ['stata', 'face', 'diana', 'Upload from file'];
-const STYLE_NAMES = ['udnie', 'scream', 'la_muse'];
+const STYLE_NAMES = ['udnie', 'scream', 'la_muse', 'rain_princess'];
 
 export class StyleTransferDemo extends StyleTransferDemoPolymer {
   // DeeplearnJS stuff
