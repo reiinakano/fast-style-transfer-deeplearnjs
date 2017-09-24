@@ -1,5 +1,5 @@
 node_modules/
-src/*.js
+src/bundle.js
 src/*.js.map
 src/ckpts/
 src/images/
