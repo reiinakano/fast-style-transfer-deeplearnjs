@@ -5,6 +5,7 @@ install:
   - "npm install && bower install && mkdir build"
 script:
   - "./scripts/deploy-demo src/styletransfer-demo.ts src/styletransfer-demo.html build"
+  - "mv build/styletransfer-demo.html build/index.html"
 deploy:
   provider: pages
   skip_cleanup: true
