@@ -1,7 +1,7 @@
 node_modules/
 src/bundle.js
 src/*.js.map
-src/ckpts/
+src/ckpts/scream/
 build/
 bower_components/
 

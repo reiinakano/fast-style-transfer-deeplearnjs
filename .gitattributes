@@ -1,1 +1,2 @@
-src/images filter=lfs diff=lfs merge=lfs -text
+src/images/** filter=lfs diff=lfs merge=lfs -text
+src/ckpts/udnie/** filter=lfs diff=lfs merge=lfs -text
