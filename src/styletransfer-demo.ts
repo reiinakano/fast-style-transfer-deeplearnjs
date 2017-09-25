@@ -43,6 +43,7 @@ export class StyleTransferDemo extends StyleTransferDemoPolymer {
   // DOM Elements
   private contentImgElement: HTMLImageElement;
   private styleImgElement: HTMLImageElement;
+  private sizeSlider: any;
 
   private canvas: HTMLCanvasElement;
   private canvasContext: CanvasRenderingContext2D;
@@ -102,6 +103,16 @@ export class StyleTransferDemo extends StyleTransferDemoPolymer {
     this.canvas.style.display = 'none';
 
     this.initWebcamVariables();
+
+    this.sizeSlider = this.querySelector('#sizeSlider') as any;
+    this.sizeSlider.addEventListener('immediate-value-change', (event: any) => {
+      this.styleImgElement.height = this.sizeSlider.immediateValue;
+      this.contentImgElement.height = this.sizeSlider.immediateValue;
+    })
+    this.sizeSlider.addEventListener('change', (event: any) => {
+      this.styleImgElement.height = this.sizeSlider.immediateValue;
+      this.contentImgElement.height = this.sizeSlider.immediateValue;
+    })
 
     this.fileSelect = this.querySelector('#fileSelect') as HTMLButtonElement;
     this.fileSelect.addEventListener('change', (event: any) => {

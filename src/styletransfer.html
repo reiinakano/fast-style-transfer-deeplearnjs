@@ -4,6 +4,8 @@
 <link rel="import" href="../bower_components/paper-item/paper-item.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-slider/paper-slider.html">
+<link rel="import" href="../bower_components/paper-tooltip/paper-tooltip.html">
 
 <dom-module id="styletransfer-demo">
 <style>
@@ -32,6 +34,10 @@
   footer {
     clear: both;
     padding: 0 15px;
+  }
+
+  #styleImg {
+    margin-bottom: 25px;
   }
 
   #train-button-container {
@@ -73,6 +79,12 @@
     <section id="content">
       <div id="imgContainer" align="middle">
         <img id="contentImg"/>
+
+        <paper-slider id="sizeSlider" value="250" min="10" max="500"></paper-slider>
+        <paper-tooltip for="sizeSlider">
+          Adjusts size of the content image. Bigger sizes may result in better stylization of images, although will take up more memory and time.
+        </paper-tooltip>
+
         <paper-dropdown-menu no-animations label="Content">
           <paper-listbox attr-for-selected="value" id="content-dropdown" class="dropdown-content" selected="{{selectedContentName}}" slot="dropdown-content">
             <template is="dom-repeat" items="[[contentNames]]">
