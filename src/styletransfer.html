@@ -65,8 +65,8 @@
     width: 800px;
   }
   #warning {
-    margin-left: 15px;
-    margin-right: 15px;
+    margin-left: 50px;
+    margin-right: 50px;
   }
 </style>
 <template>
@@ -145,7 +145,7 @@
   </div>
 
   <div id="warning" class="w3-panel w3-pale-yellow w3-round-xlarge" align="center">
-  <p style="color: brown">This implementation is still very slow compared to what can be done. Deeplearn.JS is a new library and some functions still do not have a WebGL implementation. Don't worry, as soon as the required functions become available, I'll update this site accordingly.</p>
+  <p style="color: brown">This implementation has major bottlenecks as some required functions are not yet implemented in Deeplearn.JS. Expect this to run much faster when fixed. <a href="https://github.com/reiinakano/fast-style-transfer-deeplearnjs">More details.</a></p>
   </div>
 
   <input type="file" id="fileSelect" style="display: none" accept="image/x-png,image/gif,image/jpeg"/>
