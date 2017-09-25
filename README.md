@@ -28,6 +28,49 @@ For each available style, your browser will download a model around ~6.6MB in si
 
 I know. Sorry, I'm not really a UI designer. I have about a 10 minute tolerance for tweaking HTML and CSS until I give up. The good news is, it's all open source on Github! If you want to help improve the page's design, please send a pull request! :)
 
+## Development
+
+To run this locally, clone the project and prepare the development environment:
+
+```bash
+$ git clone https://github.com/reiinakano/fast-style-transfer-deeplearnjs.git
+$ cd fast-style-transfer-deeplearnjs
+$ npm install && bower install # Install node modules and bower components
+```
+
+To interactively develop the application
+
+```bash
+$ ./scripts/watch-demo src/styletransfer-demo.ts
+>> Waiting for initial compile...
+>> 1023189 bytes written to src/bundle.js (0.71 seconds) at 2:20:06 AM
+>> Starting up http-server, serving ./
+>> Available on:
+>>   http://127.0.0.1:8080
+>> Hit CTRL-C to stop the server
+```
+
+The application will be available at `http://localhost:8080/src/styletransfer-demo.html` and will watch for changes of typescript code.
+
+## Adding your own styles
+
+The way Fast Neural Style Transfer works is, one has to train a new neural network for each "Style" image and upload it to the server. Training takes 4-6 hours on a relatively powerful GPU (Maxwell Titan X).
+
+To train your own style model from scratch, please follow the instructions from this [Github repository](https://github.com/lengstrom/fast-style-transfer) to get your own .ckpt file. You will need Python, Tensorflow, and a decent GPU.
+
+Once you have the `model.ckpt` file for your style, run the following:
+
+```bash
+$ python scripts/dump_checkpoint_vars.py --output_dir=src/ckpts/my-new-style --checkpoint_file=/path/to/model.ckpt
+$ python scripts/remove_optimizer_variables.py --output_dir=src/ckpts/my-new-style
+```
+
+If all goes well, `src/ckpts/my-new-style` should contain ~6.7MB of 49 items including a `manifest.json` file.
+
+Adding the style to the application is then as simple as modifying the `STYLE_MAPPINGS` variable in `src/styletransfer-demo.ts`.
+
+If you're able to successfully achieve cool new styles, I'd be glad to add them to this demo!
+
 ## Credits
 
 Credits belong to the following:
