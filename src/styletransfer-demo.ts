@@ -12,12 +12,7 @@ export const StyleTransferDemoPolymer: new () => PolymerHTMLElement =
         contentNames: Array,
         selectedContentName: String,
         styleNames: Array,
-        selectedStyleName: String,
-        totalSteps: Number,
-        secsPerStep: Number,
-        contentLoss: Number,
-        styleLoss: Number,
-        applicationState: Number
+        selectedStyleName: String
       }
     });
 
@@ -117,6 +112,7 @@ export class StyleTransferDemo extends StyleTransferDemoPolymer {
         this.contentImgElement.src = target.result;
       });
       fileReader.readAsDataURL(f);
+      this.fileSelect.value = '';
     });
 
     // Add listener to drop downs
@@ -150,6 +146,7 @@ export class StyleTransferDemo extends StyleTransferDemoPolymer {
       this.startButton.disabled = true;
       this.transformNet = new TransformNet(this.gpgpu, this.math,
         STYLE_MAPPINGS[this.selectedStyleName]);
+
       this.transformNet.loadVariables()
       .then(() => {
         this.startButton.textContent = 'Processing image';
