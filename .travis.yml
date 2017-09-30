@@ -3,14 +3,14 @@ node_js:
   - "7"
 git:
   lfs_skip_smudge: true
-before_install:
-  - echo -e "machine github.com\n  login $GITHUB_TOKEN" >> ~/.netrc
-  - git lfs pull
 install:
   - "npm install && bower install && mkdir build"
 script:
   - "./scripts/deploy-demo src/styletransfer-demo.ts src/styletransfer-demo.html build"
   - "mv build/styletransfer-demo.html build/index.html"
+before_deploy:
+  - echo -e "machine github.com\n  login $GITHUB_TOKEN" >> ~/.netrc
+  - git lfs pull
   - "cp src/support.js build/support.js"
   - "cp -r src/images build/images"
   - "cp -r src/ckpts build/ckpts"
