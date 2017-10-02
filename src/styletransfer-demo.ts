@@ -4,6 +4,10 @@ import {Array3D, GPGPUContext, NDArrayMathCPU, NDArrayMathGPU} from 'deeplearn';
 import {TransformNet} from './net';
 import {PolymerElement, PolymerHTMLElement} from './polymer-spec';
 
+function clamp(num: number): number {
+  return Math.min(Math.max(num, 0), 255);
+}
+
 // tslint:disable-next-line:variable-name
 export const StyleTransferDemoPolymer: new () => PolymerHTMLElement =
     PolymerElement({
@@ -269,9 +273,9 @@ export class StyleTransferDemo extends StyleTransferDemoPolymer {
     let pixelOffset = 0;
     for (let i = 0; i < ndarray.shape[0]; i++) {
       for (let j = 0; j < ndarray.shape[1]; j++) {
-        this.imageData.data[pixelOffset++] = ndarray.get(i, j, 0);
-        this.imageData.data[pixelOffset++] = ndarray.get(i, j, 1);
-        this.imageData.data[pixelOffset++] = ndarray.get(i, j, 2);
+        this.imageData.data[pixelOffset++] = clamp(ndarray.get(i, j, 0));
+        this.imageData.data[pixelOffset++] = clamp(ndarray.get(i, j, 1));
+        this.imageData.data[pixelOffset++] = clamp(ndarray.get(i, j, 2));
         this.imageData.data[pixelOffset++] = 255;
       }
     }
