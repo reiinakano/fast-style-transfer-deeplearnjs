@@ -1,6 +1,4 @@
-import {Scalar, Array1D, Array3D, Array4D, CheckpointLoader, GPGPUContext, NDArray, NDArrayMathCPU, NDArrayMathGPU} from 'deeplearn';
-
-import * as imagenet_util from './imagenet_util';
+import {Scalar, Array1D, Array3D, Array4D, CheckpointLoader, NDArray, NDArrayMathCPU, NDArrayMathGPU} from 'deeplearn';
 
 const GOOGLE_CLOUD_STORAGE_DIR =
 //    'https://storage.googleapis.com/learnjs-data/checkpoint_zoo/';
@@ -9,8 +7,7 @@ const GOOGLE_CLOUD_STORAGE_DIR =
 export class TransformNet {
   private variables: {[varName: string]: NDArray};
 
-  constructor(private gpgpu: GPGPUContext, 
-    private math: NDArrayMathGPU, private style: string) {}
+  constructor(private math: NDArrayMathGPU, private style: string) {}
 
   /**
    * Loads necessary variables for SqueezeNet. Resolves the promise when the
@@ -26,33 +23,6 @@ export class TransformNet {
         resolve();
       })
       .catch((error) => reject(error));
-    });
-  }
-
-  /**
-   * Preprocess an RGB color texture before inferring through squeezenet.
-   * @param rgbTexture The RGB color texture to process into an Array3D.
-   * @param imageDimensions The 2D dimensions of the image.
-   */
-  preprocessColorTextureToArray3D(rgbTexture: WebGLTexture, imageDimensions: [
-    number, number
-  ]): Array3D {
-    const preprocessInputShader =
-        imagenet_util.getUnpackAndPreprocessInputShader(
-            this.gpgpu, [imageDimensions[0], imageDimensions[1]]);
-
-    const preprocessResultShapeRC: [number, number] =
-        [imageDimensions[0], imageDimensions[1] * 3];
-
-    const preprocessResultTexture =
-        this.math.getTextureManager().acquireTexture(preprocessResultShapeRC);
-
-    imagenet_util.preprocessInput(
-        this.gpgpu, preprocessInputShader, rgbTexture,
-        preprocessResultTexture, preprocessResultShapeRC);
-    return NDArray.make<Array3D>([imageDimensions[0], imageDimensions[1], 3], {
-      texture: preprocessResultTexture,
-      textureShapeRC: preprocessResultShapeRC
     });
   }
 
