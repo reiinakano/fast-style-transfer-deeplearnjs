@@ -1,4 +1,4 @@
-import {Scalar, Array1D, Array3D, Array4D, CheckpointLoader, NDArray, NDArrayMathCPU, NDArrayMathGPU} from 'deeplearn';
+import {Scalar, Array1D, Array3D, Array4D, CheckpointLoader, NDArray, NDArrayMathGPU} from 'deeplearn';
 
 const GOOGLE_CLOUD_STORAGE_DIR =
 //    'https://storage.googleapis.com/learnjs-data/checkpoint_zoo/';
@@ -113,74 +113,17 @@ export class TransformNet {
   private instanceNorm(input: Array3D, varId: number): Array3D {
     console.log('Starting instance norm' + varId);
     const [height, width, inDepth]: [number, number, number] = input.shape;
-    const [mu, sigma_sq]: [Array3D, Array3D] = this.instanceMoments(input);
+    const moments = this.math.moments(input, [0, 1]);
+    const mu = moments.mean as Array3D;
+    const sigma_sq = moments.variance as Array3D;
     const shift = this.variables[this.varName(varId)] as Array1D;
     const scale = this.variables[this.varName(varId + 1)] as Array1D;
     const epsilon = Scalar.new(1e-3);
-    const normalized = this.math.divideStrict(this.math.subStrict(input, mu), 
+    const normalized = this.math.divide(this.math.sub(input, mu), 
       this.math.sqrt(this.math.add(sigma_sq, epsilon)));
     const shifted = this.math.add(this.math.multiply(scale, normalized), shift);
     console.log('Finished instance norm')
     return shifted.as3D(height, width, inDepth);
-  }
-
-  /**
-   * Copies behavior of tf.nn.moments but purely for instance normalization.
-   * Equivalent to tf.nn.moments(net, [0, 1], keep_dims=True) for a tensor 
-   * of shape ()
-   *
-   * @param input Array3D shape [height, width, inDepth]
-   * @return mean and variance per channel. Same shape as input.
-   */
-  private instanceMoments(input: Array3D): [Array3D, Array3D] {
-    const [height, width, inDepth] = input.shape;
-    const hWProduct = height * width;
-
-    // Create explicit MathCPU for unimplemented GPU operations
-    const mathCPU = new NDArrayMathCPU;
-
-    // Switch dims for easier slicing. Operation is now on CPU
-    console.log('instanceMoments: switching dims');
-    const switched = mathCPU.switchDim(input, [2, 0, 1]);
-    console.log('instanceMoments: switched dims');
-    const switchedValues = switched.getValues();
-
-    // Calculate mean and variance per channel
-    const means = [];
-    const variances = [];
-    for (let i = 0; i < inDepth; i ++) {
-      const curr = switchedValues.slice(i*hWProduct, (i+1)*hWProduct);
-
-      var sum = 0;
-      for (let j = 0; j < curr.length; j++) {
-        sum += curr[j];
-      }
-      const avg = sum / curr.length;
-      means.push(avg);
-
-      var diffSum = 0;
-      for (let j = 0; j < curr.length; j++) {
-        diffSum += (avg - curr[j]) * (avg - curr[j]);
-      }
-      variances.push(diffSum / curr.length);
-    }
-    console.log('instanceMoments: calculated means and variances');
-
-    // "Broadcast" means and variances back to original shape
-    const keepDimMeans = new Array(hWProduct*inDepth);
-    const keepDimVariances = new Array(hWProduct*inDepth);
-    for (let i = 0; i < hWProduct; i ++) {
-      for (let j = 0; j < inDepth; j ++) {
-        keepDimMeans[i*inDepth + j] = means[j];
-        keepDimVariances[i*inDepth + j] = variances[j];
-      }
-    }
-    console.log('instanceMoments: "Broadcasted" to orig shape');
-
-    const meansArray = Array3D.new(input.shape, keepDimMeans);
-    const variancesArray = Array3D.new(input.shape, keepDimVariances);
-
-    return [meansArray, variancesArray];
   }
 
   private varName(varId: number): string {
