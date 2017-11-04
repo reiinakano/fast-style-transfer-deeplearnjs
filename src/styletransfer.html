@@ -9,72 +9,133 @@
 
 <dom-module id="styletransfer-demo">
 <style>
-  #pagewrap {
-    padding: 5px;
-    width: 960px;
-    margin: 20px auto;
-  }
-  header {
-    height: 80px;
-    padding: 0 15px;
-  }
-  #content {
-    width: 420px;
-    float: left;
-    padding: 5px 15px;
-  }
+#pagewrap {
+  padding: 5px;
+  width: 960px;
+  margin: 20px auto;
+}
+header {
+  background: #fafafa;
+  padding-top: 20px;
+  padding-bottom: 20px;
+  margin-top: 0px;
+}
+#content {
+  width: 420px;
+  float: left;
+  padding: 5px 15px;
+}
 
-  #style {
-    width: 424px; /* Account for margins + border values */
-    float: right;
-    padding: 5px 15px;
-    margin: 0px 5px 5px 5px;
-  }
-  
-  footer {
-    clear: both;
-    padding: 0 15px;
-  }
+#style {
+  width: 424px; /* Account for margins + border values */
+  float: right;
+  padding: 5px 15px;
+  margin: 0px 5px 5px 5px;
+}
 
-  #styleImg {
-    margin-bottom: 25px;
-  }
+footer {
+  clear: both;
+  padding: 0 15px;
+}
 
-  #train-button-container {
-    padding-bottom: 15px;
-  }
+#styleImg {
+  margin-bottom: 25px;
+}
 
-  #activationsContainer, #webcam-message, #ssl-message {
-    text-align: center;
+#train-button-container {
+  padding-bottom: 15px;
+}
+
+#activationsContainer, #webcam-message, #ssl-message {
+  text-align: center;
+}
+#webcam-message, #load-error-message, #ssl-message {
+  background-color: #fbb;
+  outline: 1px solid rgb(100, 0, 0);
+  width: 904px;
+  padding: 5px 0;
+  margin: 10px auto;
+}
+#imgContainer, #className {
+  display: table-cell;
+  vertical-align: top;
+}
+#className {
+  padding-top: 40px;
+}
+#inference-canvas {
+  width: 800px;
+}
+#warning {
+  margin-left: 50px;
+  margin-right: 50px;
+}
+
+article {
+  background: #fafafa;
+  padding: 80px 0;
+  box-shadow: 0 0px 4px rgba(0, 0, 0, 0.1);
+  /*border-top: 1px solid rgba(0, 0, 0, 0.08);*/
+}
+
+article h2, article h3 {
+  margin: 60px 0 20px 0;
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 1.45em;
+  color: rgba(0, 0, 0, 0.7);
+}
+
+article h3 {
+  margin: 40px 0 20px 0;
+  font-size: 18px;
+}
+
+article :first-child h2 {
+  margin-top: 0;
+}
+
+article p {
+  font-weight: 400;
+  font-size: 17px;
+  line-height: 1.6;
+  color: rgba(0, 0, 0, 0.7);
+}
+
+body {
+  margin: 0;
+}
+
+.l--body {
+  width: 550px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.l--page {
+  width: 944px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (min-width: 1180px) {
+  .l--page {
+    width: 1100px;
   }
-  #webcam-message, #load-error-message, #ssl-message {
-    background-color: #fbb;
-    outline: 1px solid rgb(100, 0, 0);
-    width: 904px;
-    padding: 5px 0;
-    margin: 10px auto;
+}
+
+@media (min-width: 1400px) {
+  .l--page {
+    width: 1220px;
   }
-  #imgContainer, #className {
-    display: table-cell;
-    vertical-align: top;
-  }
-  #className {
-    padding-top: 40px;
-  }
-  #inference-canvas {
-    width: 800px;
-  }
-  #warning {
-    margin-left: 50px;
-    margin-right: 50px;
-  }
+}
 </style>
 <template>
+  <header>
+    <h1 align="center">Fast Neural Style Transfer with Deeplearn.JS</h1>
+  </header>
 
   <div id="pagewrap">
-    <header>
-      <h1 align="center">Fast Neural Style Transfer with Deeplearn.JS</h1>
-    </header>
 
     <section id="content">
       <div id="imgContainer" align="middle">
@@ -144,10 +205,6 @@
     </ul>
   </div>
 
-  <div id="warning" class="w3-panel w3-pale-yellow w3-round-xlarge" align="center">
-  <p style="color: brown">This implementation has major bottlenecks as some required functions are not yet implemented in Deeplearn.JS. Expect this to run much faster when fixed. <a href="https://github.com/reiinakano/fast-style-transfer-deeplearnjs">More details.</a></p>
-  </div>
-
   <input type="file" id="fileSelect" style="display: none" accept="image/x-png,image/gif,image/jpeg"/>
 
   <!--<div>Status: [[status]]</div>-->
@@ -167,5 +224,44 @@
     We could not find a webcam, attach one to view the full demo!
   </div>
 
+<article id="article-text">
+  <div class="l--body">
+    <h2>What is this?</h2>
+    <p>This is an implementation of the Fast Neural Style Transfer algorithm running purely on the browser using the Deeplearn.JS library. Basically, a neural network attempts to "draw" one picture, the Content, in the style of another, the Style.</p>
+  </div>
+
+  <div class="l--body">
+    <h2>Is my data safe? Can you see my webcam pics?</h2>
+    <p>Your data and pictures here never leave your computer! In fact, this is one of the main advantages of running neural networks in your browser. Instead of sending us your data, we send *you* both the model *and* the code to run the model. These are then run by your browser.</p>.
+  </div>
+
+  <div class="l--body">
+    <h2>How big are the models I'm downloading?</h2>
+    <p>For each available style, your browser will download a model around ~6.6MB in size. Be careful if you have limited bandwidth (mobile data users).</p>
+  </div>
+
+  <div class="l--body">
+    <h2>Is the code open source?</h2>
+    <p>Yup! Visit <a href="https://github.com/reiinakano/fast-style-transfer-deeplearnjs">https://github.com/reiinakano/fast-style-transfer-deeplearnjs</a> to examine the code. Also, feel free to submit any issues or pull requests to the repository as well.</p>
+  </div>
+
+  <div class="l--body">
+    <h2>This web page is ugly.</h2>
+    <p>I know. Sorry, I'm not really a UI designer. I have about a 10 minute tolerance for tweaking HTML and CSS until I give up. The good news is, it's all open source on Github! If you want to help improve the page's design, please send a pull request! :)</p>
+  </div>
+
+  <div class="l--body">
+    <h2>Credits</h2>
+    <p>
+      This demo was put together by Reiichiro Nakano but could never have been done without the following:
+      <ul>
+      <li>The authors of the original <a href="https://arxiv.org/abs/1508.06576">Neural Style Transfer paper</a>.</li>
+      <li>The authors of the paper introducing <a href="https://arxiv.org/abs/1603.08155">Real-Time Style Transfer</a>.</li>
+      <li>The author of the <a href="https://github.com/lengstrom/fast-style-transfer">fast-style-transfer</a> Github repository.</li>
+      <li>The authors of <a href="https://github.com/PAIR-code/deeplearnjs">Deeplearn.JS</a></li>
+      </ul>
+    </p>
+  </div>
+</article>
 </template>
 </dom-module>

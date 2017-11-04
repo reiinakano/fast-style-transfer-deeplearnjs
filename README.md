@@ -16,10 +16,6 @@ This is an implementation of the Fast Neural Style Transfer algorithm running pu
 
 Your data and pictures here never leave your computer! In fact, this is one of the main advantages of running neural networks in your browser. Instead of sending us your data, we send *you* both the model *and* the code to run the model. These are then run by your browser.
 
-### Is this implementation optimized?
-
-As of today, there are major bottlenecks in the implementation of the model. Deeplearn.JS is a new library and some functions still do not have a WebGL implementation. Don't worry, as soon as the required functions become available, I'll update this site accordingly. I've [asked for help](https://github.com/PAIR-code/deeplearnjs/issues/141) on the official deeplearnjs repository, and will implement any advice I get for making this as fast as possible.
-
 ### How big are the models I'm downloading?
 
 For each available style, your browser will download a model around ~6.6MB in size. Be careful if you have limited bandwidth (mobile data users).

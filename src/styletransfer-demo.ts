@@ -159,7 +159,7 @@ export class StyleTransferDemo extends StyleTransferDemoPolymer {
         'none';
       this.startButton.textContent = 'Starting style transfer.. Downloading + running model';
       this.startButton.disabled = true;
-      this.transformNet = new TransformNet(this.gpgpu, this.math,
+      this.transformNet = new TransformNet(this.math,
         STYLE_MAPPINGS[this.selectedStyleName]);
 
       this.transformNet.loadVariables()
@@ -239,13 +239,8 @@ export class StyleTransferDemo extends StyleTransferDemoPolymer {
     console.log(canvasTextureShape);
     
     this.math.scope((keep, track) => {
-      const canvasTexture =
-          this.math.getTextureManager().acquireTexture(canvasTextureShape);
-      this.gpgpu.uploadPixelDataToTexture(canvasTexture, this.contentImgElement);
-      console.log(canvasTexture);
 
-      const preprocessed = this.transformNet.preprocessColorTextureToArray3D(
-        canvasTexture, canvasTextureShape);
+      const preprocessed = track(Array3D.fromPixels(this.contentImgElement));
 
       const inferenceResult = this.transformNet.infer(preprocessed);
       this.drawOnCanvas(inferenceResult);
