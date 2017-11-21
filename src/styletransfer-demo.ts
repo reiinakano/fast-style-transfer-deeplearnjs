@@ -1,12 +1,8 @@
 // tslint:disable-next-line:max-line-length
-import {Array3D, GPGPUContext, NDArrayMathCPU, NDArrayMathGPU} from 'deeplearn';
+import {Array3D, GPGPUContext, gpgpu_util, render_ndarray_gpu_util, NDArrayMathCPU, NDArrayMathGPU} from 'deeplearn';
 // import * as imagenet_util from '../models/imagenet_util';
 import {TransformNet} from './net';
 import {PolymerElement, PolymerHTMLElement} from './polymer-spec';
-
-function clamp(num: number): number {
-  return Math.min(Math.max(num, 0), 255);
-}
 
 // tslint:disable-next-line:variable-name
 export const StyleTransferDemoPolymer: new () => PolymerHTMLElement =
@@ -33,7 +29,7 @@ const STYLE_MAPPINGS: {[varName: string]: string} = {
   'Rain Princess, Leonid Afremov': 'rain_princess',
   'The Wave, Katsushika Hokusai': 'wave',
   'The Wreck of the Minotaur, J.M.W. Turner': 'wreck'
-}
+};
 const STYLE_NAMES = Object.keys(STYLE_MAPPINGS);
 
 export class StyleTransferDemo extends StyleTransferDemoPolymer {
@@ -41,20 +37,21 @@ export class StyleTransferDemo extends StyleTransferDemoPolymer {
   private math: NDArrayMathGPU;
   private mathCPU: NDArrayMathCPU;
   private gpgpu: GPGPUContext;
+  private gl: WebGLRenderingContext;
 
   private transformNet: TransformNet;
 
   // DOM Elements
   private contentImgElement: HTMLImageElement;
   private styleImgElement: HTMLImageElement;
+  // tslint:disable-next-line:no-any
   private sizeSlider: any;
 
   private canvas: HTMLCanvasElement;
-  private canvasContext: CanvasRenderingContext2D;
-  private imageData: ImageData;
 
   private startButton: HTMLButtonElement;
 
+  // tslint:disable-next-line:no-any
   private camDialog: any;
   private stream: MediaStream;
   private webcamVideoElement: HTMLVideoElement;
@@ -74,10 +71,12 @@ export class StyleTransferDemo extends StyleTransferDemoPolymer {
   private applicationState: ApplicationState;
 
   ready() {
-    // Initialize DeeplearnJS stuff
-    this.gpgpu = new GPGPUContext;
+    // Initialize deeplearn.js stuff
+    this.canvas = this.querySelector('#imageCanvas') as HTMLCanvasElement;
+    this.gl = gpgpu_util.createWebGLContext(this.canvas);
+    this.gpgpu = new GPGPUContext(this.gl);
     this.math = new NDArrayMathGPU(this.gpgpu);
-    this.mathCPU = new NDArrayMathCPU;
+    this.mathCPU = new NDArrayMathCPU();
 
     // Initialize polymer properties
     this.applicationState = ApplicationState.IDLE;
@@ -100,28 +99,30 @@ export class StyleTransferDemo extends StyleTransferDemoPolymer {
     this.styleImgElement.src = 'images/udnie.jpg';
     this.styleImgElement.height = 250;
 
-    this.canvas = this.querySelector('#imageCanvas') as HTMLCanvasElement;
-    this.canvas.width = 0;
-    this.canvas.height = 0;
-    this.canvasContext = this.canvas.getContext('2d') as CanvasRenderingContext2D;
-    this.canvas.style.display = 'none';
+    this.transformNet = new TransformNet(this.math,
+        STYLE_MAPPINGS[this.selectedStyleName]);
 
     this.initWebcamVariables();
 
+    // tslint:disable-next-line:no-any
     this.sizeSlider = this.querySelector('#sizeSlider') as any;
-    this.sizeSlider.addEventListener('immediate-value-change', (event: any) => {
+    this.sizeSlider.addEventListener('immediate-value-change', 
+    // tslint:disable-next-line:no-any
+      (event: any) => {
       this.styleImgElement.height = this.sizeSlider.immediateValue;
       this.contentImgElement.height = this.sizeSlider.immediateValue;
-    })
+    });
+    // tslint:disable-next-line:no-any
     this.sizeSlider.addEventListener('change', (event: any) => {
       this.styleImgElement.height = this.sizeSlider.immediateValue;
       this.contentImgElement.height = this.sizeSlider.immediateValue;
-    })
+    });
 
     this.fileSelect = this.querySelector('#fileSelect') as HTMLButtonElement;
+    // tslint:disable-next-line:no-any
     this.fileSelect.addEventListener('change', (event: any) => {
       const f: File = event.target.files[0];
-      const fileReader: FileReader = new FileReader;
+      const fileReader: FileReader = new FileReader();
       fileReader.onload = ((e) => {
         const target: FileReader = e.target as FileReader;
         this.contentImgElement.src = target.result;
@@ -134,22 +135,23 @@ export class StyleTransferDemo extends StyleTransferDemoPolymer {
     const contentDropdown = this.querySelector('#content-dropdown');
     // tslint:disable-next-line:no-any
     contentDropdown.addEventListener('iron-activate', (event: any) => {
-      if (event.detail.selected === 'Use webcam') {
+      const selected: string = event.detail.selected as string;
+      if (selected === 'Use webcam') {
         this.openWebcamModal();
       }
-      else if (event.detail.selected === 'Upload from file') {
+      else if (selected === 'Upload from file') {
         this.fileSelect.click();
       }
       else {
-        this.contentImgElement.src = 'images/' + event.detail.selected + '.jpg';
+        this.contentImgElement.src = 'images/' + selected + '.jpg';
       }
     });
 
     const styleDropdown = this.querySelector('#style-dropdown');
     // tslint:disable-next-line:no-any
     styleDropdown.addEventListener('iron-activate', (event: any) => {
-
-      this.styleImgElement.src = 'images/' + STYLE_MAPPINGS[event.detail.selected] + '.jpg';
+      this.styleImgElement.src = 
+          'images/' + STYLE_MAPPINGS[event.detail.selected] + '.jpg';
     });
 
     // Add listener to start
@@ -157,12 +159,12 @@ export class StyleTransferDemo extends StyleTransferDemoPolymer {
     this.startButton.addEventListener('click', () => {
       (this.querySelector('#load-error-message') as HTMLElement).style.display =
         'none';
-      this.startButton.textContent = 'Starting style transfer.. Downloading + running model';
+      this.startButton.textContent = 
+          'Starting style transfer.. Downloading + running model';
       this.startButton.disabled = true;
-      this.transformNet = new TransformNet(this.math,
-        STYLE_MAPPINGS[this.selectedStyleName]);
+      this.transformNet.setStyle(STYLE_MAPPINGS[this.selectedStyleName]);
 
-      this.transformNet.loadVariables()
+      this.transformNet.load()
       .then(() => {
         this.startButton.textContent = 'Processing image';
         this.runInference();
@@ -173,17 +175,20 @@ export class StyleTransferDemo extends StyleTransferDemoPolymer {
         console.log(error);
         this.startButton.textContent = 'Start Style Transfer';
         this.startButton.disabled = false;
-        (this.querySelector('#load-error-message') as HTMLElement).textContent = error;
-        (this.querySelector('#load-error-message') as HTMLElement).style.display =
-          'block';
+        const errMessage = 
+            this.querySelector('#load-error-message') as HTMLElement;
+        errMessage.textContent = error;
+        errMessage.style.display = 'block';
       });
     });
   }
 
   private initWebcamVariables() {
     this.camDialog = this.querySelector('#webcam-dialog');
-    this.webcamVideoElement = this.querySelector('#webcamVideo') as HTMLVideoElement;
-    this.takePicButton = this.querySelector('#takePicButton') as HTMLButtonElement;
+    this.webcamVideoElement = 
+        this.querySelector('#webcamVideo') as HTMLVideoElement;
+    this.takePicButton = 
+        this.querySelector('#takePicButton') as HTMLButtonElement;
     this.closeModal = this.querySelector('#closeModal') as HTMLButtonElement;
 
     // Check if webcam is even available
@@ -203,14 +208,15 @@ export class StyleTransferDemo extends StyleTransferDemoPolymer {
     });
 
     this.takePicButton.addEventListener('click', () => {
-      var hiddenCanvas: HTMLCanvasElement = 
+      const hiddenCanvas: HTMLCanvasElement = 
         this.querySelector('#hiddenCanvas') as HTMLCanvasElement;
-      var hiddenContext: CanvasRenderingContext2D = hiddenCanvas.getContext('2d');
+      const hiddenContext: CanvasRenderingContext2D = 
+        hiddenCanvas.getContext('2d');
       hiddenCanvas.width = this.webcamVideoElement.width;
       hiddenCanvas.height = this.webcamVideoElement.height;
       hiddenContext.drawImage(this.webcamVideoElement, 0, 0, 
         hiddenCanvas.width, hiddenCanvas.height);
-      var imageDataURL = hiddenCanvas.toDataURL('image/jpg');
+      const imageDataURL = hiddenCanvas.toDataURL('image/jpg');
       this.contentImgElement.src = imageDataURL;
       this.stream.getTracks()[0].stop();
     });
@@ -233,17 +239,18 @@ export class StyleTransferDemo extends StyleTransferDemoPolymer {
     );
   }
 
-  runInference() {
-    const canvasTextureShape: [number, number] = [this.contentImgElement.height, 
-    this.contentImgElement.width];
-    console.log(canvasTextureShape);
-    
-    this.math.scope((keep, track) => {
+  async runInference() {
+    await this.math.scope(async (keep, track) => {
 
       const preprocessed = track(Array3D.fromPixels(this.contentImgElement));
 
-      const inferenceResult = this.transformNet.infer(preprocessed);
-      this.drawOnCanvas(inferenceResult);
+      const inferenceResult = await this.transformNet.predict(preprocessed);
+
+      this.setCanvasShape(inferenceResult.shape);
+      this.renderShader = render_ndarray_gpu_util.getRenderRGBShader(
+        this.gpgpu, inferenceResult.shape[1]);
+      render_ndarray_gpu_util.renderToCanvas(
+        this.gpgpu, this.renderShader, inferenceResult.getTexture());
     });
   }
 
@@ -252,32 +259,14 @@ export class StyleTransferDemo extends StyleTransferDemoPolymer {
     this.canvas.height = shape[0];
     if (shape[1] > shape[0]) {
       this.canvas.style.width = '500px';
-      this.canvas.style.height = shape[0]/shape[1]*500 + 'px';
+      this.canvas.style.height = (shape[0]/shape[1]*500).toString() + 'px';
     }
     else {
       this.canvas.style.height = '500px';
-      this.canvas.style.width = shape[1]/shape[0]*500 + 'px';
+      this.canvas.style.width = (shape[1]/shape[0]*500).toString() + 'px';
     }
   }
 
-  private drawOnCanvas(ndarray: Array3D) {
-    this.setCanvasShape(ndarray.shape);
-    this.imageData = this.canvasContext.createImageData(
-        this.canvas.width, this.canvas.height);
-
-    let pixelOffset = 0;
-    for (let i = 0; i < ndarray.shape[0]; i++) {
-      for (let j = 0; j < ndarray.shape[1]; j++) {
-        this.imageData.data[pixelOffset++] = clamp(ndarray.get(i, j, 0));
-        this.imageData.data[pixelOffset++] = clamp(ndarray.get(i, j, 1));
-        this.imageData.data[pixelOffset++] = clamp(ndarray.get(i, j, 2));
-        this.imageData.data[pixelOffset++] = 255;
-      }
-    }
-
-    this.canvas.style.display = '';
-    this.canvasContext.putImageData(this.imageData, 0, 0);
-  }
 }
 
 document.registerElement(StyleTransferDemo.prototype.is, StyleTransferDemo);

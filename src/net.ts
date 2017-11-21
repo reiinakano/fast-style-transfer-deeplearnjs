@@ -1,71 +1,72 @@
-import {Scalar, Array1D, Array3D, Array4D, CheckpointLoader, NDArray, NDArrayMathGPU} from 'deeplearn';
+import {Scalar, Array1D, Array3D, Array4D, CheckpointLoader, Model, NDArray, NDArrayMathGPU} from 'deeplearn';
 
 const GOOGLE_CLOUD_STORAGE_DIR =
-//    'https://storage.googleapis.com/learnjs-data/checkpoint_zoo/';
+//  'https://storage.googleapis.com/learnjs-data/checkpoint_zoo/transformnet/';
     document.URL.substr(0,document.URL.lastIndexOf('/')) + '/ckpts/';
 
-export class TransformNet {
+export class TransformNet implements Model {
   private variables: {[varName: string]: NDArray};
+  private variableDictionary: {[styleName: string]: 
+    {[varName: string]: NDArray}};
+  private timesScalar: NDArray;
+  private plusScalar: NDArray;
+  private epsilonScalar: NDArray;
 
-  constructor(private math: NDArrayMathGPU, private style: string) {}
+  constructor(private math: NDArrayMathGPU, private style: string) {
+    this.variableDictionary = {};
+    this.timesScalar = Scalar.new(150);
+    this.plusScalar = Scalar.new(255./2);
+    this.epsilonScalar = Scalar.new(1e-3);
+  }
+
+  setStyle(style: string) {
+    this.style = style;
+  }
 
   /**
    * Loads necessary variables for SqueezeNet. Resolves the promise when the
    * variables have all been loaded.
    */
-  loadVariables(): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
+  async load(): Promise<void> {
+    if (this.variableDictionary[this.style] == null) {
       const checkpointLoader =
           new CheckpointLoader(GOOGLE_CLOUD_STORAGE_DIR + this.style + '/');
-      checkpointLoader.getAllVariables()
-      .then(variables => {
-        this.variables = variables;
-        resolve();
-      })
-      .catch((error) => reject(error));
-    });
+      this.variableDictionary[this.style] = 
+          await checkpointLoader.getAllVariables();
+    }
+    this.variables = this.variableDictionary[this.style];
   }
 
   /**
-   * Infer through TransformNet, assumes variables have been loaded. This does
-   * standard ImageNet pre-processing before inferring through the model. This
-   * method returns named activations as well as pre-softmax logits. The user
-   * needs to clean up namedActivations after inferring.
+   * Infer through TransformNet, assumes variables have been loaded.
+   * Original Tensorflow version of model can be found at
+   * https://github.com/lengstrom/fast-style-transfer
    *
    * @param preprocessedInput preprocessed input Array.
    * @return Array3D containing pixels of output img
    */
-  infer(preprocessedInput: Array3D): Array3D {
+  async predict (preprocessedInput: Array3D): Promise<Array3D> {
 
     const img = this.math.scope((keep, track) => {
-      console.log('conv1');
       const conv1 = this.convLayer(preprocessedInput, 1, true, 0);
-      console.log('conv2');
       const conv2 = this.convLayer(conv1, 2, true, 3);
-      console.log('conv3');
       const conv3 = this.convLayer(conv2, 2, true, 6);
-      console.log('resid1');
       const resid1 = this.residualBlock(conv3, 9);
-      console.log('resid2');
       const resid2 = this.residualBlock(resid1, 15);
-      console.log('resid3');
       const resid3 = this.residualBlock(resid2, 21);
-      console.log('resid4');
       const resid4 = this.residualBlock(resid3, 27);
-      console.log('resid5');
       const resid5 = this.residualBlock(resid4, 33);
-      console.log('conv_t1');
-      const conv_t1 = this.convTransposeLayer(resid5, 64, 2, 39);
-      console.log('conv_t2');
-      const conv_t2 = this.convTransposeLayer(conv_t1, 32, 2, 42);
-      console.log('conv_t3');
-      const conv_t3 = this.convLayer(conv_t2, 1, false, 45);
-      console.log('out');
-      const out_tanh = this.math.tanh(conv_t3);
-      const scaled = this.math.scalarTimesArray(Scalar.new(150), out_tanh);
-      const shifted = this.math.scalarPlusArray(Scalar.new(255./2), scaled);
+      const convT1 = this.convTransposeLayer(resid5, 64, 2, 39);
+      const convT2 = this.convTransposeLayer(convT1, 32, 2, 42);
+      const convT3 = this.convLayer(convT2, 1, false, 45);
+      const outTanh = this.math.tanh(convT3);
+      const scaled = this.math.scalarTimesArray(this.timesScalar, outTanh);
+      const shifted = this.math.scalarPlusArray(this.plusScalar, scaled);
+      const clamped = this.math.clip(shifted, 0, 255);
+      const normalized = this.math.divide(
+          clamped, Scalar.new(255.)) as Array3D;
 
-      return shifted;
+      return normalized;
     });
 
     return img;
@@ -111,18 +112,16 @@ export class TransformNet {
   }
 
   private instanceNorm(input: Array3D, varId: number): Array3D {
-    console.log('Starting instance norm' + varId);
     const [height, width, inDepth]: [number, number, number] = input.shape;
     const moments = this.math.moments(input, [0, 1]);
     const mu = moments.mean as Array3D;
-    const sigma_sq = moments.variance as Array3D;
+    const sigmaSq = moments.variance as Array3D;
     const shift = this.variables[this.varName(varId)] as Array1D;
     const scale = this.variables[this.varName(varId + 1)] as Array1D;
-    const epsilon = Scalar.new(1e-3);
+    const epsilon = this.epsilonScalar;
     const normalized = this.math.divide(this.math.sub(input, mu), 
-      this.math.sqrt(this.math.add(sigma_sq, epsilon)));
+      this.math.sqrt(this.math.add(sigmaSq, epsilon)));
     const shifted = this.math.add(this.math.multiply(scale, normalized), shift);
-    console.log('Finished instance norm')
     return shifted.as3D(height, width, inDepth);
   }
 
@@ -131,7 +130,15 @@ export class TransformNet {
       return 'Variable';
     }
     else {
-      return 'Variable_' + varId;
+      return 'Variable_' + varId.toString();
+    }
+  }
+
+  dispose() {
+    for (const styleName in this.variableDictionary) {
+      for (const varName in this.variableDictionary[styleName]) {
+        this.variableDictionary[styleName][varName].dispose();
+      }
     }
   }
 }
