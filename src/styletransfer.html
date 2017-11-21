@@ -178,31 +178,10 @@ body {
         <paper-button class="button" primary raised id="start">Start Style Transfer</paper-button>
       </div>
       <div id="canvasContainer" align="middle">
-        <canvas id="imageCanvas" width="300" height="300"></canvas>
+        <canvas id="imageCanvas" width="1" height="1"></canvas>
       </div>
     </footer>
     
-  </div>
-
-  <div id="description" style="display: none">
-    <hr>
-    <h2>What is this?</h2>
-    <p>This is an implementation of the Fast Neural Style Transfer algorithm running purely on the browser using the Deeplearn.JS library. Basically, a neural network attempts to "draw" one picture, the Content, in the style of another, the Style.</p>
-    <h2>Is my data safe? Can you see my webcam pics?</h2>
-    <p>Your data and pictures here never leave your computer! In fact, this is one of the main advantages of running neural networks in your browser. Instead of sending us your data, we send <i>you</i> both the model <i>and</i> the code to run the model. These are then run by your browser.</p>
-    <h2>You say "fast" but this seems rather slow and memory hungry.</h2>
-    <p>As of today, there are major bottlenecks in the implementation of the model. Deeplearn.JS is a new library and some functions still do not have a WebGL implementation. Don't worry, as soon as the required functions become available, I'll update this site accordingly. I've asked for help on the official deeplearnjs repository, and will implement any advice I get for making this as fast as possible.</p>
-    <h2>How big are the models I'm downloading?</h2>
-    <p>For each available style, your browser will download a model around ~20MB in size. Be careful if you have limited bandwidth (mobile data users).</p>
-    <h2>This is an ugly page.</h2>
-    <p>I know. Sorry, I'm not really a UI designer. I have about a 10 minute tolerance for tweaking HTML and CSS until I give up. The good news is, it's all open source on Github! If you want to improve the page's design, please send us a pull request! :)</p>
-    <p>Credits mostly belong to the following:</p>
-    <ul>
-      <li>The authors of the original Neural Style Transfer paper.</li>
-      <li>The authors of the Fast Style Transfer paper.</li>
-      <li>The author of the fast-style-transfer Github repository.</li>
-      <li>The authors of Deeplearn.JS</li>
-    </ul>
   </div>
 
   <input type="file" id="fileSelect" style="display: none" accept="image/x-png,image/gif,image/jpeg"/>
