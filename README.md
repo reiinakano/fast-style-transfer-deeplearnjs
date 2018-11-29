@@ -1,6 +1,6 @@
 # Fast Neural Style Transfer in browser with deeplearn.js
 
-DEPRECATED: This repository has been deprecated and is no longer actively maintained. There have been many newer versions of deeplearn.js (now called TensorFlow.js) since this implementation. This code has been integrated into the [ml5.js](https://github.com/ml5js/ml5-library) library and the TensorFlow.js version is actively maintained over there. The demo site is still up, though, and will remain up as long as GitHub Pages exists. 
+DEPRECATED: This repository has been deprecated and is no longer actively maintained (build instructions no longer work either). There is a much, much better version (where you can use ANY style) at https://github.com/reiinakano/arbitrary-image-stylization-tfjs. If you're *really* interested in this version of fast style transfer, this code has been integrated into the [ml5.js](https://github.com/ml5js/ml5-library) library and the TensorFlow.js version is actively maintained over there.
 
 This repository contains an implementation of the Fast Neural Style Transfer algorithm running fully inside a browser using the Deeplearn.JS library.
 
